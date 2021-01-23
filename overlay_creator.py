@@ -4,6 +4,7 @@ from PIL import Image, ImageDraw, ImageFont
 from urllib.request import urlopen
 import os
 import shutil
+import sys
 
 
 def init_values():
@@ -78,6 +79,8 @@ def parse_tcx(tree):
 
 
 def create_images(trackpoints, font, speed_frame_rate, hr_frame_rate):
+    sys.stdout.write('Deleting old images...')
+
     if os.path.exists('speed'):
         shutil.rmtree('speed')
     os.mkdir('speed')
@@ -85,6 +88,8 @@ def create_images(trackpoints, font, speed_frame_rate, hr_frame_rate):
     if os.path.exists('heart_rate'):
         shutil.rmtree('heart_rate')
     os.mkdir('heart_rate')
+
+    sys.stdout.write('\rGenerating images, 0 % done')
 
     for i in range(len(trackpoints) - 1):
         trackpoint = trackpoints[i]
@@ -122,6 +127,10 @@ def create_images(trackpoints, font, speed_frame_rate, hr_frame_rate):
             hr_frame = Image.new('RGBA', font.getsize(hr), (255, 255, 255, 0))
             ImageDraw.Draw(hr_frame).text((0, 0), hr, font=font, fill=(255, 255, 255, 255))
             hr_frame.save('heart_rate/heart_rate.' + str(frame_index) + '.png')
+
+        progress = (next_trackpoint['time'] - trackpoints[0]['time']).seconds /\
+                   (trackpoints[-1]['time'] - trackpoints[0]['time']).seconds * 100
+        sys.stdout.write('\rGenerating images, ' + str(int(progress)) + ' % done')
 
 
 def main():
