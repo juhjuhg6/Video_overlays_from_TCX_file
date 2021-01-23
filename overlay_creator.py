@@ -7,6 +7,26 @@ import shutil
 import sys
 
 
+SPEED_PARAMETERS = {
+    '0': { # for km/h
+        'multiplier': 3.6,
+        'power': 1,
+    },
+    '1': { # for min/km
+        'multiplier': 100/6,
+        'power': -1
+    },
+    '2': { # for m/s
+        'multiplier': 1,
+        'power': 1
+    },
+    '3': { # for mph
+        'multiplier': 2.23693629,
+        'power': 1
+    }
+}
+
+
 def init_values():
     while True:
         filename = input('Path of the TCX file: ')
@@ -19,6 +39,16 @@ def init_values():
         except:
             print('Invalid file')
             continue
+
+    while True:
+        user_input = input('Choose speed unit (0 = km/h, 1 = min/km, 2 = m/s, 3 = mph, default is km/h): ')
+        if user_input in ['0', '1', '2', '3']:
+            speed_unit = user_input
+            break
+        elif user_input == '':
+            speed_unit = '0'
+            break
+        print('Invalid input')
 
     options = {
         'speed_frame_rate': {
@@ -48,7 +78,8 @@ def init_values():
                     print('Invalid value')
                     continue
 
-    return options['speed_frame_rate']['value'], options['hr_frame_rate']['value'], options['font_size']['value'], tree
+    return options['speed_frame_rate']['value'], options['hr_frame_rate']['value'], options['font_size']['value'],\
+           tree, speed_unit
 
 
 def parse_tcx(tree):
@@ -78,7 +109,7 @@ def parse_tcx(tree):
     return trackpoints
 
 
-def create_images(trackpoints, font, speed_frame_rate, hr_frame_rate):
+def create_images(trackpoints, font, speed_frame_rate, hr_frame_rate, speed_unit):
     sys.stdout.write('Deleting old images...')
 
     if os.path.exists('speed'):
@@ -105,7 +136,11 @@ def create_images(trackpoints, font, speed_frame_rate, hr_frame_rate):
                 # speed changes linearly between trackpoints
                 speed = trackpoint['speed'] + (next_trackpoint['speed'] - trackpoint['speed']) * j\
                         / (trackpoint_time_diff.seconds * speed_frame_rate)
-                speed = str(round(speed * 3.6, 1))
+                if speed == 0:
+                    speed = str(speed)
+                else:
+                    speed = str(round(pow(speed, SPEED_PARAMETERS[speed_unit]['power'])
+                                      * SPEED_PARAMETERS[speed_unit]['multiplier'], 1))
 
             frame_index = (trackpoint['time'] - trackpoints[0]['time']).seconds * speed_frame_rate + j
             speed_frame = Image.new('RGBA', font.getsize(speed), (255, 255, 255, 0))
@@ -134,14 +169,14 @@ def create_images(trackpoints, font, speed_frame_rate, hr_frame_rate):
 
 
 def main():
-    speed_frame_rate, hr_frame_rate, font_size, tree = init_values()
+    speed_frame_rate, hr_frame_rate, font_size, tree, speed_unit = init_values()
 
     trackpoints = parse_tcx(tree)
 
     font_url = 'https://github.com/googlefonts/roboto/raw/master/src/hinted/Roboto-Bold.ttf'
     font = ImageFont.truetype(urlopen(font_url), size=font_size)
 
-    create_images(trackpoints, font, speed_frame_rate, hr_frame_rate)
+    create_images(trackpoints, font, speed_frame_rate, hr_frame_rate, speed_unit)
 
 
 main()
