@@ -7,6 +7,18 @@ import shutil
 
 
 def init_values():
+    while True:
+        filename = input('Path of the TCX file: ')
+        try:
+            tree = ET.parse(filename)
+            break
+        except FileNotFoundError:
+            print('Invalid path or filename')
+            continue
+        except:
+            print('Invalid file')
+            continue
+
     options = {
         'speed_frame_rate': {
             'input text': 'Choose speed frame rate (0 for no frames, default: 2): ',
@@ -35,11 +47,10 @@ def init_values():
                     print('Invalid value')
                     continue
 
-    return options['speed_frame_rate']['value'], options['hr_frame_rate']['value'], options['font_size']['value']
+    return options['speed_frame_rate']['value'], options['hr_frame_rate']['value'], options['font_size']['value'], tree
 
 
-def parse_tcx(filename):
-    tree = ET.parse(filename)
+def parse_tcx(tree):
     root = tree.getroot()
 
     ns = {'ns': 'http://www.garmin.com/xmlschemas/TrainingCenterDatabase/v2',
@@ -114,9 +125,9 @@ def create_images(trackpoints, font, speed_frame_rate, hr_frame_rate):
 
 
 def main():
-    speed_frame_rate, hr_frame_rate, font_size = init_values()
+    speed_frame_rate, hr_frame_rate, font_size, tree = init_values()
 
-    trackpoints = parse_tcx('test.tcx')
+    trackpoints = parse_tcx(tree)
 
     font_url = 'https://github.com/googlefonts/roboto/raw/master/src/hinted/Roboto-Bold.ttf'
     font = ImageFont.truetype(urlopen(font_url), size=font_size)
