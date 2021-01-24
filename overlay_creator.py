@@ -112,13 +112,15 @@ def parse_tcx(tree):
 def create_images(trackpoints, font, speed_frame_rate, hr_frame_rate, speed_unit):
     sys.stdout.write('Deleting old images...')
 
-    if os.path.exists('speed'):
-        shutil.rmtree('speed')
-    os.mkdir('speed')
+    if speed_frame_rate != 0:
+        if os.path.exists('speed'):
+            shutil.rmtree('speed')
+        os.mkdir('speed')
 
-    if os.path.exists('heart_rate'):
-        shutil.rmtree('heart_rate')
-    os.mkdir('heart_rate')
+    if hr_frame_rate != 0:
+        if os.path.exists('heart_rate'):
+            shutil.rmtree('heart_rate')
+        os.mkdir('heart_rate')
 
     sys.stdout.write('\rGenerating images, 0 % done')
 
