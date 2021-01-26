@@ -5,8 +5,8 @@ Script creates PNG image sequences from speed and heart rate data whitch then ca
 
 ## Supported files
 
-This tool is proven to work only with TCX files exported from Garmin Connect.
-TCX files generated from other services might not work.
+This tool is developed to work with TCX files exported from Garmin Connect.
+TCX files from other sources might not work.
 
 However if you have uncompatible TCX file or your activity is in some other format (such as GPX of FIT) you might be
 able to use it by first uploading the activity file of any format to Garmin Connect and then downloading the activity
